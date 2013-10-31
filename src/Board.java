@@ -13,6 +13,7 @@ import java.util.Enumeration;
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 
+import bogglegraph.BoggleGraphElegant;
 import dictionary.Boggle;
 
 /**
@@ -38,6 +39,7 @@ public class Board extends JPanel implements MouseListener, MouseMotionListener{
 	private int col[] = {-1, 95, 195, 290, 390};
 	private ArrayList<CircularButton> boggle;
 	private Boggle boggin;
+	private BoggleGraphElegant graph;
 	public Board(){
 		addMouseListener(this);
 		addMouseMotionListener(this);
@@ -70,6 +72,7 @@ public class Board extends JPanel implements MouseListener, MouseMotionListener{
 	 */
 	public void setBoggin(Boggle boggin) {
 		this.boggin = boggin;
+			
 	}
 	public void paint(Graphics gr){
 		Graphics2D g = (Graphics2D) gr;
