@@ -86,7 +86,7 @@ public class BoggleTile {
 	 *        : BoggleTile to be checked
 	 * @return true if equal, false otherwise
 	 */
-	public boolean isEqual(BoggleTile other){
+	public boolean equals(BoggleTile other){
 		return character.equals(other.getCharacter()) && x == other.getX() && y == other.getY();
 	}
 }

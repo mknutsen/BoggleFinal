@@ -28,7 +28,7 @@ public class BoggleGraphElegant extends BoggleGraph {
 	 */
 	public BoggleGraphElegant(Boggle boggin) {
 		super(boggin);
-		trie = new DictionaryTrie(new File("dictionary.txt"));
+		trie = boggin.getDictionary();
 		setUp();
 	}
 

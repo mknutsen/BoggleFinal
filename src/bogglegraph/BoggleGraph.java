@@ -103,14 +103,14 @@ public abstract class BoggleGraph {
 		for(int j=0;j<craig.size();j++){
 			i=j+1;
 			while(i<craig.size()){
-				if(craig.get(i).isEqual(craig.get(j))){
+				if(craig.get(i).equals(craig.get(j))){
 					craig.remove(i);
 				}
 				else i++;
 			}
 		}
 		for(i=0;i<craig.size();i++){
-			if(craig.get(i).isEqual(board[x][y])){
+			if(craig.get(i).equals(board[x][y])){
 				craig.remove(i);
 			}
 		}

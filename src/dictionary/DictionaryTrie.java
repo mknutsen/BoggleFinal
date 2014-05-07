@@ -42,7 +42,9 @@ public class DictionaryTrie extends BoggleDictionary{
 	 */
 	public boolean checkWord(String word){
 		word = word.toLowerCase();
-		return root.checkWord(word);
+		boolean x =  root.checkWord(word);
+//		System.out.println(word +" is "+ x);
+		return x;
 	}
 	/**
 	 * Checks stem of word to see if its part of a word in the dictionary
