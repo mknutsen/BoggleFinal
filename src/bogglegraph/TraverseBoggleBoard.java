@@ -6,17 +6,29 @@ import java.util.Hashtable;
 
 import dictionary.Boggle;
 import dictionary.DictionaryTrie;
-
+/**
+ * Given a Boggle object, it finds all of the words (according the dictionary in the Boggle object) that exist on the boggle board
+ * @author Max Knutsen <mknutse1@umbc.edu>
+ *
+ */
 public class TraverseBoggleBoard {
 	private Boggle boggin;
 	private BoggleTile[][] board = new BoggleTile[5][5];
+	/**
+	 * TraverseBoggleBoard constructor, calls setUp
+	 * @param boggin
+	 *        : the boggle object to analyze
+	 */
 	public TraverseBoggleBoard(Boggle boggin){
 		this.boggin = boggin;
 		setUp();
 	}
-
-	public ArrayList<String> analyze() {
-		ArrayList<String> word = new ArrayList<String>();
+	/**
+	 * Runs through the board and calls checkBoard on every cell
+	 * @return an arraylist of arraylists of boggletiles. this will make it easy to construct a trajectory and display the found words on the boggle board (each internal arraylist represents a word)
+	 */
+	public ArrayList<ArrayList<BoggleTile>> analyze() {
+		ArrayList<ArrayList<BoggleTile>> word = new ArrayList<ArrayList<BoggleTile>>();
 		ArrayList<BoggleTile> tiles;
 		for(int i=0;i<5;i++){
 			for(int j=0;j<5;j++){
@@ -29,28 +41,17 @@ public class TraverseBoggleBoard {
 		}
 		return word;
 	}
-
-	private ArrayList<String> checkPath(String x, BoggleTile boggleTile, Hashtable<BoggleTile, Integer> pastTiles, ArrayList<String> words) {
-		pastTiles.put(boggleTile, 1);
-		x += boggleTile.c;
-		if(boggin.getDictionary().checkWord(x)){
-			words.add(x);
-//			System.out.println(x);
-		}
-		if(boggin.getDictionary().checkStem(x) == false){
-			return words;
-		}
-		ArrayList<BoggleTile> surroundings = getSurroundings(boggleTile);
-		for(int i = 0; i < surroundings.size(); i++){
-			if(pastTiles.containsKey(surroundings.get(i)) == false){
-				words.addAll(checkPath(x, surroundings.get(i), (Hashtable<BoggleTile, Integer>)pastTiles.clone(), words));
-			}
-		}
-		return words;
-	}
-	private ArrayList<String> checkPath(ArrayList<BoggleTile> word, ArrayList<String> foundWords){
+	/**
+	 * This is a recursive method that only continues if the node for the character in the trie has children (so if there might be words that follow, it continues looking)
+	 * @param word
+	 *        : an arraylist of boggletiles to track the current path being analyzed
+	 * @param foundWords
+	 *        : an ArrayList of words that have been found so far by the algorithm
+	 * @return an arraylist of found words (each found word being represented by an arraylist of boggletiles
+	 */
+	private ArrayList<ArrayList<BoggleTile>> checkPath(ArrayList<BoggleTile> word, ArrayList<ArrayList<BoggleTile>> foundWords){
 		if(boggin.getDictionary().checkWord(toWord(word))){
-			foundWords.add(toWord(word));
+			foundWords.add(word);
 //			System.out.println(toWord(word));
 		}
 		if(boggin.getDictionary().checkStem(toWord(word)) == false)
@@ -66,6 +67,12 @@ public class TraverseBoggleBoard {
 		}
 		return foundWords;
 	}
+	/**
+	 * Converts an arraylist of boggletiles to a string
+	 * @param word
+	 *        : arraylist of boggle tiles to be converted
+	 * @return a string of the boggletile characters concatonated in order
+	 */
 	private String toWord(ArrayList<BoggleTile> word) {
 		// TODO Auto-generated method stub
 		String x = "";
@@ -74,7 +81,25 @@ public class TraverseBoggleBoard {
 //		System.out.println(x);
 		return x;
 	}
-
+	/**
+	 * turns an arraylist of boggletile list-words to an arraylist of words represented by strings
+	 * @param words
+	 *        : arraylist of boggletile arraylists (each one representing a word)
+	 * @return an arraylist of the strings (one string per internal arraylist in words)
+	 */
+	private ArrayList<String> allToWord(ArrayList<ArrayList<BoggleTile>> words){
+		ArrayList<String> x = new ArrayList<String>();
+		for(int i=0;i<words.size();i++){
+			x.add(toWord(words.get(i)));
+		}
+		return x;
+	}
+	/**
+	 * Gets all legal neighbors for a given tile (including diagonals)
+	 * @param tile
+	 *        : tile to be checked for neighbors
+	 * @return an arraylist<boggletile> of all legal neighbors
+	 */
 	private ArrayList<BoggleTile> getSurroundings(BoggleTile tile){
 		ArrayList<BoggleTile> surroundings = new ArrayList<BoggleTile>();
 		for(int i=-1;i<=1;i++){
@@ -88,6 +113,9 @@ public class TraverseBoggleBoard {
 		}
 		return surroundings;
 	}
+	/**
+	 * Turns the boggle objects board into a 2D array of boggletiles
+	 */
 	private void setUp() {
 		for(int i=0;i<5;i++){
 			for(int j=0;j<5;j++){
@@ -95,19 +123,40 @@ public class TraverseBoggleBoard {
 			}
 		}
 	}
-
-	private class BoggleTile{
+	/**
+	 * Wrapper class for the boggle board so each tile contains its character and the coordinates at which it is located
+	 * @author Max
+	 */
+	public class BoggleTile{
 		int x,y;
 		char c;
+		/**
+		 * Constructor for BoggleTile
+		 * @param x
+		 *        : [x][y] in a 2D array
+		 * @param y
+		 *        : [x][y] in a 2D array
+		 * @param c
+		 *        : the character that the boggletile holds
+		 */
 		BoggleTile(int x, int y, char c){
 			this.x = x;
 			this.y = y;
 			this.c = c;
 		}
+		/**
+		 * I dont think this is needed, but the hashCode is the ascii value for the character concatonated with the x and y values
+		 */
 		public int hashCode(){
 			int ascii = c;
 			return ascii*100+x*10+y;
 		}
+		/**
+		 * Checks equivalence with other tile
+		 * @param other
+		 *        : other tile
+		 * @return true if x, y, and c are equivalent; false otherwise
+		 */
 		public boolean equals(BoggleTile other){
 			return c == other.c && x == other.x && y == other.y;
 		}
@@ -118,6 +167,6 @@ public class TraverseBoggleBoard {
 	public static void main(String[] args){
 		TraverseBoggleBoard x = new TraverseBoggleBoard(new Boggle());
 //		System.out.println(x.boggin.toString());
-		System.out.println(x.analyze().size());
+		System.out.println(x.allToWord(x.analyze()));
  	}
 }
