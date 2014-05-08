@@ -18,9 +18,6 @@ import javax.swing.JFrame;
  *
  */
 public class Graphics extends JFrame{
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	public Graphics(){
 		Board charles  = new Board();

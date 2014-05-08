@@ -27,7 +27,33 @@ public class Boggle {
 		foundWords = new Hashtable<String, Integer>();
 		rand = new Random();
 		board = new String[5][5];
-		randomizeBoard();
+		randomizeTiles();
+		shuffleBoard();
+	}
+	/**
+	 * 
+	 */
+	public void shuffleBoard() {
+		ArrayList<String> arrayStrings = new ArrayList<String>();
+		for(int i=0;i<5;i++){
+			for(int j=0;j<5;j++){
+				arrayStrings.add(board[i][j]);
+			}
+		}
+		Random rand = new Random();
+		String placeHolder;
+		int randPlace;
+		for(int i = arrayStrings.size()-1;i>0; i--){
+			randPlace = rand.nextInt(i+1);
+			placeHolder = arrayStrings.get(i);
+			arrayStrings.set(i, arrayStrings.get(randPlace));
+			arrayStrings.set(randPlace, placeHolder);
+		}
+		for(int i=0;i<5;i++){
+			for(int j=0;j<5;j++){
+				arrayStrings.remove(0);
+			}
+		}
 	}
 	public Boggle(String[][] x){
 		this();
@@ -37,19 +63,16 @@ public class Boggle {
 	/**
 	 * Takes the DICE and picks a random letter for each dice and then selects a random place for the dice to be
 	 */
-	private void randomizeBoard() {
+	private void randomizeTiles() {
 		ArrayList<String> temp = new ArrayList<String>();
 		String x="";
 		for(int i = 0; i<dice.length;i++){
 			x = ""+dice[i].charAt(rand.nextInt(dice[i].length()));
 			temp.add(x);
 		}
-		int random;
 		for(int i=0;i<board.length;i++){
 			for(int j=0;j<board[0].length;j++){
-				random = rand.nextInt(temp.size());
-				board[i][j]=temp.get(random);
-				temp.remove(random);
+				board[i][j]=temp.remove(0);
 			}
 		}
 	}

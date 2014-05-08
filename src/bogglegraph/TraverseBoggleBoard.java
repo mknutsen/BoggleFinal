@@ -2,6 +2,7 @@ package bogglegraph;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Hashtable;
 
 import dictionary.Boggle;
@@ -14,6 +15,8 @@ import dictionary.DictionaryTrie;
 public class TraverseBoggleBoard {
 	private Boggle boggin;
 	private BoggleTile[][] board = new BoggleTile[5][5];
+	private ArrayList<String> words;
+	private ArrayList<ArrayList<BoggleTile>> wordPaths;
 	/**
 	 * TraverseBoggleBoard constructor, calls setUp
 	 * @param boggin
@@ -21,14 +24,16 @@ public class TraverseBoggleBoard {
 	 */
 	public TraverseBoggleBoard(Boggle boggin){
 		this.boggin = boggin;
+		words = new ArrayList<String>();
 		setUp();
+		wordPaths = analyze();
 	}
 	/**
 	 * Runs through the board and calls checkBoard on every cell
 	 * @return an arraylist of arraylists of boggletiles. this will make it easy to construct a trajectory and display the found words on the boggle board (each internal arraylist represents a word)
 	 */
 	public ArrayList<ArrayList<BoggleTile>> analyze() {
-		ArrayList<ArrayList<BoggleTile>> word = new ArrayList<ArrayList<BoggleTile>>();
+		ArrayList<ArrayList<BoggleTile>> wordPaths = new ArrayList<ArrayList<BoggleTile>>();
 		ArrayList<BoggleTile> tiles;
 		for(int i=0;i<5;i++){
 			for(int j=0;j<5;j++){
@@ -36,10 +41,10 @@ public class TraverseBoggleBoard {
 //				word.addAll(checkPath("", board[i][j], new Hashtable<BoggleTile, Integer>(), new ArrayList<String>()));
 				tiles = new ArrayList<BoggleTile>();
 				tiles.add(board[i][j]);
-				checkPath(tiles, word);
+				checkPath(tiles, wordPaths, words);
 			}
 		}
-		return word;
+		return wordPaths;
 	}
 	/**
 	 * This is a recursive method that only continues if the node for the character in the trie has children (so if there might be words that follow, it continues looking)
@@ -49,23 +54,24 @@ public class TraverseBoggleBoard {
 	 *        : an ArrayList of words that have been found so far by the algorithm
 	 * @return an arraylist of found words (each found word being represented by an arraylist of boggletiles
 	 */
-	private ArrayList<ArrayList<BoggleTile>> checkPath(ArrayList<BoggleTile> word, ArrayList<ArrayList<BoggleTile>> foundWords){
-		if(boggin.getDictionary().checkWord(toWord(word))){
-			foundWords.add(word);
+	private ArrayList<ArrayList<BoggleTile>> checkPath(ArrayList<BoggleTile> word, ArrayList<ArrayList<BoggleTile>> foundWordPaths, ArrayList<String> foundWords){
+		if(boggin.getDictionary().checkWord(toWord(word)) && foundWords.contains(toWord(word)) == false){
+			foundWordPaths.add(word);
+			foundWords.add(toWord(word));
 //			System.out.println(toWord(word));
 		}
 		if(boggin.getDictionary().checkStem(toWord(word)) == false)
-			return foundWords;
+			return foundWordPaths;
 		ArrayList<BoggleTile> surroundings = getSurroundings(word.get(word.size()-1));
 		ArrayList<BoggleTile> clonedWord;
 		for(int i=0;i<surroundings.size();i++){
 			if(!word.contains(surroundings.get(i))){
 				clonedWord = (ArrayList<BoggleTile>) word.clone();
 				clonedWord.add(surroundings.get(i));
-				checkPath(clonedWord, foundWords);
+				checkPath(clonedWord, foundWordPaths, foundWords);
 			}
 		}
-		return foundWords;
+		return foundWordPaths;
 	}
 	/**
 	 * Converts an arraylist of boggletiles to a string
@@ -164,9 +170,45 @@ public class TraverseBoggleBoard {
 			return c+" @ "+x+" "+y;
 		}
 	}
+	/**
+	 * @return the arraylist of arraylist of boggletiles (each internal arraylist being a word)
+	 */
+	public ArrayList<ArrayList<BoggleTile>> getWordPaths() {
+		return (ArrayList<ArrayList<BoggleTile>>) wordPaths.clone();
+	}
+	/**
+	 * @return all the words as strings
+	 */
+	public ArrayList<String> getWords() {
+		return (ArrayList<String>) words.clone();
+	}
+	/**
+	 * Gets maximum total for the board
+	 * @return total score for all the words the algorithm found
+	 */
+	public int getBoardScore(){
+		int total  = 0;
+		for(String word:words)
+			total+=boggin.getScore(word);
+		return total;
+	}
+	/**
+	 * Simple test.
+	 * Finds all the words in the board, copies it to an array and then sorts it and prints it so i could verify that there were no duplicates
+	 */
 	public static void main(String[] args){
-		TraverseBoggleBoard x = new TraverseBoggleBoard(new Boggle());
-//		System.out.println(x.boggin.toString());
-		System.out.println(x.allToWord(x.analyze()));
- 	}
+			TraverseBoggleBoard x = new TraverseBoggleBoard(new Boggle());
+	//		System.out.println(x.boggin.toString());
+			x.analyze();
+			
+			String[] y = new String[x.words.size()];
+			for(int i=0;i<y.length;i++){
+				y[i] = x.words.get(i);
+			}
+			Arrays.sort(y);
+			for(String word:y){
+				System.out.print(word+", ");
+			}
+			System.out.println("\n"+x.getBoardScore());
+	 	}
 }
