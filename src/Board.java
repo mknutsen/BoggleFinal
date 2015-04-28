@@ -44,9 +44,9 @@ public class Board extends JPanel implements MouseListener, MouseMotionListener{
 		addMouseListener(this);
 		addMouseMotionListener(this);
 		setBoggin(new Boggle());
-		Highlighter.setImage(new ImageIcon(this.getClass().getResource("highlighter.png")));
+		Highlighter.setImage(new ImageIcon(this.getClass().getResource("/resource/highlighter.png")));
 		highlighted = new ArrayList<Highlighter>();
-		board =  new ImageIcon(this.getClass().getResource("boggle2.png")).getImage();
+		board =  new ImageIcon(this.getClass().getResource("/resource/boggle2.png")).getImage();
 		setUp();
 	}
 	/**

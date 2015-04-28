@@ -1,12 +1,9 @@
 package bogglegraph;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Hashtable;
 
 import dictionary.Boggle;
-import dictionary.DictionaryTrie;
 /**
  * Given a Boggle object, it finds all of the words (according the dictionary in the Boggle object) that exist on the boggle board
  * @author Max Knutsen <mknutse1@umbc.edu>
