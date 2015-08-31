@@ -1,6 +1,5 @@
 package mknutsen.boggle.dictionary;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -29,8 +28,7 @@ public class Boggle {
      */
     public Boggle() {
 
-        setDictionary(
-                new DictionaryTrie("/mknutsen/boggle/dictionary.txt"));
+        setDictionary(new DictionaryTrie("/mknutsen/boggle/dictionary.txt"));
         foundWords = new Hashtable<String, Integer>();
         rand = new Random();
         board = new String[5][5];
@@ -165,7 +163,7 @@ public class Boggle {
         int total = 0;
         Object[] x = foundWords.values().toArray();
         for (Object word : x) {
-            int num = (int) (word);
+            int num = (Integer) (word);
             total += num;
         }
         return total;

@@ -13,7 +13,6 @@ import java.awt.*;
 
 /**
  * @author Max
- *
  */
 public class Highlighter extends CircularButton {
 
@@ -23,6 +22,7 @@ public class Highlighter extends CircularButton {
 
     /**
      * Constructs highlighter
+     *
      * @param x-coordinate
      * @param y-coordinate
      * @param length
@@ -35,6 +35,7 @@ public class Highlighter extends CircularButton {
 
     /**
      * Constructs highlighter with the same pro	perties as the given button
+     *
      * @param Button
      */
     public Highlighter(CircularButton b) {
@@ -43,6 +44,7 @@ public class Highlighter extends CircularButton {
 
     /**
      * Sets the permanent highlighter image
+     *
      * @param ImageIcon
      */
     public static void setHighlighterImage(Image i) {

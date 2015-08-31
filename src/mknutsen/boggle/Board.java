@@ -1,6 +1,6 @@
 package mknutsen.boggle;
 
-import mknutsen.boggle.bogglegraph.BoggleGraphElegant;
+import mknutsen.boggle.bogglegraph.TraverseBoggleBoard;
 import mknutsen.boggle.dictionary.Boggle;
 
 import javax.imageio.ImageIO;
@@ -32,6 +32,8 @@ public class Board extends JPanel implements MouseListener, MouseMotionListener 
 
     private Image board;
 
+    private boolean done = false;
+
     private ArrayList<Highlighter> highlighted;
 
     private int row[] = {4, 104, 203, 300, 400};
@@ -42,19 +44,26 @@ public class Board extends JPanel implements MouseListener, MouseMotionListener 
 
     private Boggle boggin;
 
-    private BoggleGraphElegant graph;
+    private TraverseBoggleBoard graph;
+
+    private int boardScore;
+
+    private Button giveUp;
 
     public Board() {
+        giveUp = new Button(500, 520, 120, 50, "give up?", 0, 0);
         addMouseListener(this);
         addMouseMotionListener(this);
-        setBoggin(new Boggle());
+        Boggle bog = new Boggle();
+        setBoggin(bog);
+        graph = new TraverseBoggleBoard(bog);
+        boardScore = setupGraph(graph);
         try {
-            Highlighter.setHighlighterImage(ImageIO.read(Board.class.getResourceAsStream(
-                    "resource/highlighter.png")));
+            Highlighter.setHighlighterImage(ImageIO.read(Board.class.getResourceAsStream("resource/highlighter.png")));
         } catch (IOException e) {
             e.printStackTrace();
         }
-        highlighted = new ArrayList<>();
+        highlighted = new ArrayList<Highlighter>();
         try {
             board = (ImageIO.read(Board.class.getResourceAsStream("resource/boggle2.png")));
         } catch (IOException e) {
@@ -62,6 +71,11 @@ public class Board extends JPanel implements MouseListener, MouseMotionListener 
             e.printStackTrace();
         }
         setUp();
+    }
+
+    private int setupGraph(TraverseBoggleBoard graph) {
+        graph.analyze();
+        return graph.getBoardScore();
     }
 
     /**
@@ -108,20 +122,19 @@ public class Board extends JPanel implements MouseListener, MouseMotionListener 
         f = new Font("Calibri Light", Font.PLAIN, 30);
         g.setFont(f);
         g.drawString("" + boggin.getTotalScore(), 610, 468);
-        int i = 0;
         int j = 0;
-        if (boggin.getFoundWords().size() > 12) {
-            i = boggin.getFoundWords().size() - 12;
-        }
         Enumeration<String> values = boggin.getFoundWords().keys();
         String nextValue;
         while (values.hasMoreElements()) {
             nextValue = values.nextElement();
             g.drawString(nextValue + " - " + boggin.getScore(nextValue), 513, j * 30 + 70);
-            i++;
             j++;
         }
         g.drawString("", 610, 435);
+        g.drawString("Maximum possible score: " + boardScore, 0, 520);
+        g.drawString(giveUp.getText(), giveUp.getStartX(), giveUp.getEndY() - 15);
+        g.drawRect(giveUp.getStartX(), giveUp.getStartY(), giveUp.getEndX() - giveUp.getStartX(),
+                giveUp.getEndY() - giveUp.getStartY());
         repaint();
     }
 
@@ -131,29 +144,34 @@ public class Board extends JPanel implements MouseListener, MouseMotionListener 
     @Override
     public void mouseDragged(MouseEvent e) {
         // TODO Auto-generated method stub
-        if (highlighted.size() >= 12) {
-            return;
-        }
-        Highlighter lastMove = highlighted.get(highlighted.size() - 1);
-        for (CircularButton x : boggle) {
-            if ((Math.abs(x.getRow() - lastMove.getRow()) == 1) || (Math.abs(x.getCol() - lastMove.getCol()) == 1)) {
-                if (x.isInside(e)) {
-                    if (Math.abs(x.getRow() - lastMove.getRow()) > 1 || Math.abs(x.getCol() - lastMove.getCol()) > 1) {
-                        return;
-                    }
-                    for (Highlighter z : highlighted) {
-                        if (z.compareTo(x) == 1) {
-                            //System.out.println("NOPE");
+        if (!done) {
+            if (highlighted.size() >= 12) {
+                return;
+            }
+            if (highlighted.size() != 0) {
+                Highlighter lastMove = highlighted.get(highlighted.size() - 1);
+                for (CircularButton x : boggle) {
+                    if ((Math.abs(x.getRow() - lastMove.getRow()) == 1) ||
+                            (Math.abs(x.getCol() - lastMove.getCol()) == 1)) {
+                        if (x.isInside(e)) {
+                            if (Math.abs(x.getRow() - lastMove.getRow()) > 1 ||
+                                    Math.abs(x.getCol() - lastMove.getCol()) > 1) {
+                                return;
+                            }
+                            for (Highlighter z : highlighted) {
+                                if (z.compareTo(x) == 1) {
+                                    //System.out.println("NOPE");
+                                    return;
+                                }
+                            }
+                            highlighted.add(new Highlighter(x));
+                            repaint();
                             return;
                         }
                     }
-                    highlighted.add(new Highlighter(x));
-                    repaint();
-                    return;
                 }
             }
         }
-
     }
 
     /* (non-Javadoc)
@@ -214,15 +232,23 @@ public class Board extends JPanel implements MouseListener, MouseMotionListener 
 				return;
 			}
 		}
-		
+
 		repaint();*/
+
         highlighted.clear();
-        for (CircularButton x : boggle) {
-            if (x.isInside(e)) {
-                highlighted.add(new Highlighter(x));
-                //System.out.println(x.getText()+"\n"+x.getStartX()+" "+x.getStartY());
+        if (!done) {
+            if (giveUp.isInside(e)) {
+                gaveUp();
                 repaint();
-                return;
+            } else {
+                for (CircularButton x : boggle) {
+                    if (x.isInside(e)) {
+                        highlighted.add(new Highlighter(x));
+                        //System.out.println(x.getText()+"\n"+x.getStartX()+" "+x.getStartY());
+                        repaint();
+                        return;
+                    }
+                }
             }
         }
     }
@@ -243,4 +269,10 @@ public class Board extends JPanel implements MouseListener, MouseMotionListener 
         repaint();
     }
 
+    private void gaveUp() {
+        done = true;
+        for (String word : graph.getWords()) {
+            boggin.checkWord(word);
+        }
+    }
 }
